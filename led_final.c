@@ -6,8 +6,6 @@
 #include<time.h>
 #include<sys/types.h>
 #include<signal.h>
-//#include<unistd.h>
-//#include<errno.h>
 #include "/usr/include/mysql/mysql.h"
 
 
@@ -35,7 +33,6 @@ void SIPO(unsigned long long int byte)
 
         for(i=0;i<61;i++){
                 digitalWrite(SDI, ((byte & (0x1000000000000000 >> i)) >0));
-                //digitalWrite(SDI, 0x1000000000000000 & (byte << i));
                 pulse(SRCLK);
         }
 }
@@ -51,27 +48,10 @@ void init(void)
         digitalWrite(SRCLK,0);
 }
 
-void wait(double seconds)
-{
-        clock_t endwait;
-        endwait = clock() + seconds * CLOCKS_PER_SEC;
-        while(clock() < endwait){}
-}
-
-void sig_handler(int signo){
-        printf("process stop\n");
-        SIPO(0x00);
-        pulse(RCLK);
-        digitalWrite(SDI,0);
-        digitalWrite(RCLK,0);
-        digitalWrite(SRCLK,0);
-        exit(0);
-}
-
 
 int main(int argc, char *argv[]){
 
-signal(SIGINT, (void *)sig_handler);
+//signal(SIGINT, (void *)sig_handler);
 //pid_t pid;
 //pid = fork();
 
@@ -115,8 +95,6 @@ exit(1);
 }
 printf("select mydb suc.\n");
 
-//printf("%d", mysql_query(conn, "select*from testtab"));
-
 char selectbuffer[256];
 sprintf(selectbuffer,"select * from %s",argv[2]);
 if(mysql_query(conn,selectbuffer)){
@@ -129,44 +107,8 @@ printf("query success\n");
 res=mysql_store_result(conn);
 printf("res success\n");
 
-/*if(pid == -1){
-        printf("can`t fork,erro\n");
-        exit(0);
-}
-*/
-
-//printf("%#x\n",(int)LED[6]);
-
 while((row=mysql_fetch_row(res))!=NULL){
 printf("%d %f %d %d %d\n", atoi(row[0]),atof(row[1]),atoi(row[2]),atoi(row[3]),atoi(row[4]));
-//printf("%d %f %f %d %d\n",atoi(row[0]),atof(row[1]),atof(row[2]),atoi(row[3]),atoi(row[4]));
-//printf("%d %f %f %d %d %d\n",atoi(row[0]),atof(row[1]),atof(row[2]),atoi(row[3]),atoi(row[4]),atoi(row[5]));
-//printf("%f %d %d %d %f %d %d %d\n",atof(row[0]),atoi(row[1]),atoi(row[2]), atoi(row[3]), atof(row[4]), atoi(row[5]), atoi(row[6]), atoi(row[7]));
-/*
-if(tmp != atoi(row[2])){
-        SIPO(LED[atoi(row[2])]);
-        pulse(RCLK);
-        delay(atof(row[1])*1000);
-        SIPO(0x00);
-        pulse(RCLK);
-        delay(100);
-        //wait(atof(row[1])*2);
-}
-else if(tmp == atoi(row[2])){
-        SIPO(LED[atoi(row[2])]);
-        pulse(RCLK);
-        delay(atof(row[1])*1000);
-        //wait(atof(row[1])*2);
-        //SIPO(0x0000000000000000);
-        SIPO(0x00);
-        pulse(RCLK);
-        delay(100);
-
-}
-*/
-
-//printf("%#x\n",(unsigned long)(LED[atoi(row[2])]+LED[atoi(row[3])]+LED[atoi(row[1])]));
-//if(pid == 0){
 
 
 SIPO(LED[atoi(row[2])]+LED[atoi(row[3])]+LED[atoi(row[4])]);
@@ -176,17 +118,6 @@ SIPO(0x00);
 pulse(RCLK);
 delay(100);
 
-
-//}
-/*else{
-SIPO(LED[atoi(row[5])]+LED[atoi(row[6])]+LED[atoi(row[7])]);
-pulse(RCLK);
-delay(atof(row[4])*1000);
-SIPO(0x00);
-pulse(RCLK);
-delay(100);
-}
-*/
 
 tmp = atoi(row[2]);
 
